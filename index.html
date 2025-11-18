@@ -91,33 +91,37 @@
           <h1 class="title is-1 publication-title">SKEL-CF: Coarse-to-Fine Biomechanical Skeleton and Surface Mesh Recovery</h1>
           <div class="is-size-5 publication-authors">
             <span class="author-block">
-              <a href="https://keunhong.com">Da Li</a><sup>1</sup>,</span>
+              Da Li</a><sup>1,2</sup>,</span>
             <span class="author-block">
-              <a href="https://utkarshsinha.com">Ji-Ping Jin</a><sup>2</sup>,</span>
+              <a href="https://pokerman8.github.io/">Ji-Ping Jin</a><sup>1,3</sup>,</span>
             <span class="author-block">
-              <a href="https://jonbarron.info"> Xiaodong Cun</a><sup>2</sup>,
+              <a href="https://vinthony.github.io/academic/"> Xiaodong Cun</a><sup>4</sup>,
             </span>
             <span class="author-block">
-              <a href="http://sofienbouaziz.com">Wei Liu</a><sup>2</sup>,
+              Wei Liu<sup>5</sup>,
             </span>
             <span class="author-block">
-              <a href="https://www.danbgoldman.com">Xuanlong Yu</a><sup>2</sup>,
+              <a href="https://xuanlong-yu.github.io/">Xuanlong Yu</a><sup>1</sup>,
             </span>
             <span class="author-block">
-              <a href="https://homes.cs.washington.edu/~seitz/">kevinchenkai</a><sup>1,2</sup>,
+              kevinchenkai</a><sup>5</sup>,
             </span>
             <span class="author-block">
-              <a href="http://www.ricardomartinbrualla.com">Rui Fan</a><sup>2</sup>
+              Rui Fan</a><sup>3</sup>
             </span>
-            <span class="author-block">Jiangang Kong</a><sup>2</sup>
+            <span class="author-block">Jiangang Kong</a><sup>5</sup>
             </span>
-            <span class="author-block">Shen Xi</a><sup>2</sup>
+            <span class="author-block">
+              <a href="https://xishen0220.github.io/">Shen Xi</a><sup>1</sup>
             </span>
           </div>
 
           <div class="is-size-5 publication-authors">
-            <span class="author-block"><sup>1</sup>University of ShenZhen,</span>
-            <span class="author-block"><sup>2</sup>Shanghaitech University</span>
+            <span class="author-block"><sup>1</sup>Intellindust AI Lab</span>
+            <span class="author-block"><sup>2</sup>ShenZhen University</span>
+            <span class="author-block"><sup>3</sup>Shanghaitech University</span>
+            <span class="author-block"><sup>4</sup>Great Bay University</span>
+            <span class="author-block"><sup>5</sup>DiDi Technology</span>
           </div>
 
           <div class="column has-text-centered">
@@ -261,32 +265,7 @@
       <div class="column is-four-fifths">
         <h2 class="title is-3">Abstract</h2>
         <div class="content has-text-justified">
-          <p>
-            We present the first method capable of photorealistically reconstructing a non-rigidly
-            deforming scene using photos/videos captured casually from mobile phones.
-          </p>
-          <p>
-            Our approach augments neural radiance fields
-            (NeRF) by optimizing an
-            additional continuous volumetric deformation field that warps each observed point into a
-            canonical 5D NeRF.
-            We observe that these NeRF-like deformation fields are prone to local minima, and
-            propose a coarse-to-fine optimization method for coordinate-based models that allows for
-            more robust optimization.
-            By adapting principles from geometry processing and physical simulation to NeRF-like
-            models, we propose an elastic regularization of the deformation field that further
-            improves robustness.
-          </p>
-          <p>
-            We show that <span class="dnerf">Nerfies</span> can turn casually captured selfie
-            photos/videos into deformable NeRF
-            models that allow for photorealistic renderings of the subject from arbitrary
-            viewpoints, which we dub <i>"nerfies"</i>. We evaluate our method by collecting data
-            using a
-            rig with two mobile phones that take time-synchronized photos, yielding train/validation
-            images of the same pose at different viewpoints. We show that our method faithfully
-            reconstructs non-rigidly deforming scenes and reproduces unseen views with high
-            fidelity.
+          Parametric 3D human models such as SMPL have driven major advances in human pose and shape estimation, yet their simplified kinematics limit biomechanical fidelity. The recently proposed SKEL model addresses this by re-rigging SMPL with an anatomically realistic skeleton. However, estimating SKEL parameters directly remains challenging due to limited training data, perspective ambiguities, and complex human articulation. We introduce SKEL-CF, a coarse-to-fine SKEL estimation framework that enables robust biomechanical human modeling from images. We adopt a transformer-based encoder–decoder architecture in which the encoder predicts coarse camera, SKEL parameters, and the decoder progressively refines them. To provide anatomically reliable supervision, we convert SMPL-based datasets into SKEL-consistent ground truth, ensuring unified skeleton–mesh alignment. To further resolve depth and scale ambiguities, we explicitly model the camera within the SKEL-CF pipeline and demonstrate its importance with diverse viewpoints. Extensive experiments show that SKEL-CF significantly advances practical SKEL estimation in the wild. On the challenging MOYO dataset, SKEL-CF achieves 85.0 MPJPE / 51.4 PA-MPJPE, outperforming HSMR (104.5 / 79.6). Our framework enables scalable and anatomically realistic human motion analysis, bridging computer vision and biomechanics applications. Our code will be released upon publication.
           </p>
         </div>
       </div>
