@@ -36,7 +36,7 @@ function initModelViewers() {
 function initSingleModel(containerId, objPath, options = {}) {
     // 默认选项
     const config = {
-        scale: options.scale || 1.0, // 模型缩放因子，可以手动调整（1.0 = 默认大小，2.0 = 2倍大小）
+        scale: options.scale || 3.0, // 模型缩放因子，可以手动调整（1.0 = 默认大小，2.0 = 2倍大小）
         ...options
     };
     
