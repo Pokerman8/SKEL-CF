@@ -35,7 +35,7 @@ function initModelViewers() {
 
 function initSingleModel(containerId, objPath, options = {}) {
     // 缩放因子：直接控制模型大小（1.0 = 原始大小，2.0 = 2倍，3.0 = 3倍）
-    const scale = options.scale !== undefined ? options.scale : 5;
+    const scale = options.scale !== undefined ? options.scale : 1;
     // 相机距离：直接控制相机距离（默认值：5，可在options中通过cameraDistance参数传入）
     // 距离越小，模型看起来越大；距离越大，模型看起来越小
     
@@ -54,7 +54,7 @@ function initSingleModel(containerId, objPath, options = {}) {
     
     // 创建相机
     const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
-    camera.position.set(0, 0, 5);
+    camera.position.set(0, 0, distance);
     
     // 创建渲染器
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
@@ -75,13 +75,15 @@ function initSingleModel(containerId, objPath, options = {}) {
     directionalLight2.position.set(-1, 0.5, -1);
     scene.add(directionalLight2);
 
+    // 相机距离：直接控制（默认值：1，越小模型越大，越大模型越小）
+    let distance = options.cameraDistance !== undefined ? options.cameraDistance : 2;
+    
     // 鼠标控制器
     let isRotating = false;
     let lastMouseX = 0;
     let lastMouseY = 0;
     let modelRotationX = 0;
     let modelRotationY = 0;
-    let distance = 5;
     
     function onMouseDown(event) {
         isRotating = true;
@@ -164,9 +166,7 @@ function initSingleModel(containerId, objPath, options = {}) {
         // 直接应用缩放因子控制模型大小
         modelGroup.scale.set(scale, scale, scale);
         
-        // 相机距离：直接控制（如果需要修改，改变下面的数值即可）
-        // 距离越小，模型看起来越大；距离越大，模型看起来越小
-        distance = options.cameraDistance !== undefined ? options.cameraDistance : 1;
+        // 确保相机距离已正确设置（在函数开始时已设置，这里只是确认）
     }, function(error) {
         console.error('加载模型失败:', error);
         container.innerHTML = '<p style="padding: 2rem; text-align: center; color: #999;">模型加载失败</p>';
