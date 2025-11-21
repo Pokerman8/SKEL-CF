@@ -39,15 +39,16 @@ function initModelViewers() {
 
 function initSingleModel(containerId, objPath, options = {}) {
     // ===== 模型大小和相机距离控制 =====
-    // 缩放因子：直接控制模型大小（1.0 = 原始大小，2.0 = 2倍，6.0 = 6倍）
-    // 修改下面的默认值来改变模型大小
-    const DEFAULT_SCALE = 10; // 临时设置为10，非常明显
+    // 缩放因子：直接控制模型大小（1.0 = 原始大小，2.0 = 2倍，10.0 = 10倍）
+    // 修改下面的 DEFAULT_SCALE 值来改变模型大小
+    const DEFAULT_SCALE = 10;
     const scale = options.scale !== undefined ? options.scale : DEFAULT_SCALE;
     
-    // 相机距离：直接控制相机距离（默认值：2，可在options中通过cameraDistance参数传入）
+    // 相机距离：直接控制相机距离（默认值：5，可在options中通过cameraDistance参数传入）
     // 距离越小，模型看起来越大；距离越大，模型看起来越小
-    // 修改下面的默认值来改变相机距离
-    const DEFAULT_DISTANCE = 1; // 临时设置为1，非常近
+    // 修改下面的 DEFAULT_DISTANCE 值来改变相机距离
+    // 建议：相机距离应该是缩放后模型大小的1-3倍左右
+    const DEFAULT_DISTANCE = 5;
     let distance = options.cameraDistance !== undefined ? options.cameraDistance : DEFAULT_DISTANCE;
     
     // 输出初始参数值（用于调试）
@@ -183,6 +184,28 @@ function initSingleModel(containerId, objPath, options = {}) {
         modelGroup.scale.set(scale, scale, scale);
         modelGroup.updateMatrixWorld(true); // 强制更新矩阵
         
+        // 根据缩放后的模型大小自动调整相机距离（可选）
+        // 如果distance未通过options设置，根据缩放后的模型大小计算合适的距离
+        const maxDim = Math.max(size.x, size.y, size.z);
+        const scaledMaxDim = maxDim * scale;
+        
+        // 如果使用默认距离，根据模型大小自动调整
+        if (options.cameraDistance === undefined) {
+            // 让缩放后的模型占据视口的约50-60%，计算合适的相机距离
+            const viewportSize = Math.min(width, height);
+            const fovRad = (camera.fov * Math.PI) / 180;
+            const targetSizeRatio = 0.6; // 模型占据视口60%
+            const targetSizeInViewport = viewportSize * targetSizeRatio;
+            
+            // 计算相机距离：让缩放后的模型占据视口约60%
+            const autoDistance = (scaledMaxDim / 2) / Math.tan(fovRad / 2) * (viewportSize / targetSizeInViewport);
+            
+            // 如果自动计算的距离合理，使用它；否则使用默认值
+            if (autoDistance > 0.5 && autoDistance < 100) {
+                distance = autoDistance;
+            }
+        }
+        
         // 更新相机位置（确保使用最新的distance值）
         camera.position.set(0, 0, distance);
         camera.lookAt(0, 0, 0);
@@ -191,21 +214,25 @@ function initSingleModel(containerId, objPath, options = {}) {
         // 输出调试信息，确认参数已正确应用
         console.log('=== 模型加载完成，参数设置 ===');
         console.log('缩放因子(scale):', scale);
-        console.log('相机距离(distance):', distance);
+        console.log('模型原始尺寸:', {
+            x: size.x.toFixed(2),
+            y: size.y.toFixed(2),
+            z: size.z.toFixed(2),
+            '最大维度': maxDim.toFixed(2)
+        });
+        console.log('缩放后的模型大小:', {
+            '最大维度': scaledMaxDim.toFixed(2)
+        });
+        console.log('相机距离(distance):', distance.toFixed(2));
         console.log('模型组缩放:', {
             x: modelGroup.scale.x,
             y: modelGroup.scale.y,
             z: modelGroup.scale.z
         });
         console.log('相机位置:', {
-            x: camera.position.x,
-            y: camera.position.y,
-            z: camera.position.z
-        });
-        console.log('模型原始尺寸:', {
-            x: size.x.toFixed(2),
-            y: size.y.toFixed(2),
-            z: size.z.toFixed(2)
+            x: camera.position.x.toFixed(2),
+            y: camera.position.y.toFixed(2),
+            z: camera.position.z.toFixed(2)
         });
         console.log('============================');
     }, function(error) {
