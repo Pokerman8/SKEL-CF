@@ -29,7 +29,11 @@ function initModelViewers() {
     ];
 
     modelConfigs.forEach(config => {
-        initSingleModel(config.containerId, config.objPath);
+        // 可以为每个模型单独设置参数，或者使用默认值
+        initSingleModel(config.containerId, config.objPath, {
+            // scale: 1,        // 取消注释并修改值来改变模型大小
+            // cameraDistance: 5 // 取消注释并修改值来改变相机距离
+        });
     });
 }
 
@@ -38,6 +42,7 @@ function initSingleModel(containerId, objPath, options = {}) {
     const scale = options.scale !== undefined ? options.scale : 1;
     // 相机距离：直接控制相机距离（默认值：5，可在options中通过cameraDistance参数传入）
     // 距离越小，模型看起来越大；距离越大，模型看起来越小
+    let distance = options.cameraDistance !== undefined ? options.cameraDistance : 2;
     
     const container = document.getElementById(containerId);
     if (!container) {
@@ -74,9 +79,6 @@ function initSingleModel(containerId, objPath, options = {}) {
     const directionalLight2 = new THREE.DirectionalLight(0xffffff, 0.4);
     directionalLight2.position.set(-1, 0.5, -1);
     scene.add(directionalLight2);
-
-    // 相机距离：直接控制（默认值：1，越小模型越大，越大模型越小）
-    let distance = options.cameraDistance !== undefined ? options.cameraDistance : 1;
     
     // 鼠标控制器
     let isRotating = false;
@@ -166,7 +168,26 @@ function initSingleModel(containerId, objPath, options = {}) {
         // 直接应用缩放因子控制模型大小
         modelGroup.scale.set(scale, scale, scale);
         
-        // 确保相机距离已正确设置（在函数开始时已设置，这里只是确认）
+        // 输出调试信息，确认参数已正确应用
+        console.log('模型加载完成，参数设置:', {
+            '缩放因子(scale)': scale,
+            '相机距离(distance)': distance,
+            '模型组缩放': {
+                x: modelGroup.scale.x,
+                y: modelGroup.scale.y,
+                z: modelGroup.scale.z
+            },
+            '相机位置': {
+                x: camera.position.x,
+                y: camera.position.y,
+                z: camera.position.z
+            },
+            '模型原始尺寸': {
+                x: size.x.toFixed(2),
+                y: size.y.toFixed(2),
+                z: size.z.toFixed(2)
+            }
+        });
     }, function(error) {
         console.error('加载模型失败:', error);
         container.innerHTML = '<p style="padding: 2rem; text-align: center; color: #999;">模型加载失败</p>';
