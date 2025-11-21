@@ -76,7 +76,7 @@ function initSingleModel(containerId, objPath, options = {}) {
     scene.add(directionalLight2);
 
     // 相机距离：直接控制（默认值：1，越小模型越大，越大模型越小）
-    let distance = options.cameraDistance !== undefined ? options.cameraDistance : 2;
+    let distance = options.cameraDistance !== undefined ? options.cameraDistance : 1;
     
     // 鼠标控制器
     let isRotating = false;
