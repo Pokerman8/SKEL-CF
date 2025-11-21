@@ -74,8 +74,8 @@ function initSingleModel(containerId, objPath) {
     let isRotating = false;
     let lastMouseX = 0;
     let lastMouseY = 0;
-    let rotationX = 0;
-    let rotationY = 0;
+    let modelRotationX = 0; // 模型在X轴的旋转（上下）
+    let modelRotationY = 0; // 模型在Y轴的旋转（左右）
     let distance = 5;
     
     function onMouseDown(event) {
@@ -89,11 +89,12 @@ function initSingleModel(containerId, objPath) {
         const deltaX = event.clientX - lastMouseX;
         const deltaY = event.clientY - lastMouseY;
         
-        rotationY += deltaX * 0.01;
-        rotationX += deltaY * 0.01;
+        // 左右旋转（绕Y轴）
+        modelRotationY += deltaX * 0.01;
+        // 上下旋转（绕X轴），允许360度自由旋转
+        modelRotationX += deltaY * 0.01;
         
-        // 允许自由旋转，不限制角度
-        // rotationX 可以自由旋转360度
+        // 不限制任何角度，允许完全自由旋转
         
         lastMouseX = event.clientX;
         lastMouseY = event.clientY;
@@ -115,6 +116,10 @@ function initSingleModel(containerId, objPath) {
     renderer.domElement.addEventListener('wheel', onWheel);
     renderer.domElement.style.cursor = 'grab';
 
+    // 创建一个组来包含模型，便于统一控制旋转
+    const modelGroup = new THREE.Group();
+    scene.add(modelGroup);
+    
     // 加载OBJ模型（使用简化的OBJLoader）
     loadOBJModel(objPath, function(object) {
         // 计算模型边界，自动调整相机位置
@@ -125,13 +130,16 @@ function initSingleModel(containerId, objPath) {
         // 居中模型
         object.position.sub(center);
         
-        // 修复上下颠倒：绕X轴旋转180度
-        object.rotation.x = Math.PI;
+        // 修复上下颠倒：尝试不同的旋转方式
+        // 如果模型上下颠倒，可以取消下面某个选项的注释来尝试：
+        // object.rotation.x = Math.PI;     // X轴旋转180度
+        // object.rotation.y = Math.PI;     // Y轴旋转180度  
+        // object.rotation.z = Math.PI;     // Z轴旋转180度
+        // object.rotation.x = Math.PI / 2; // X轴旋转90度
+        // object.rotation.z = Math.PI / 2; // Z轴旋转90度
         
-        // 计算合适的初始相机距离
-        const maxDim = Math.max(size.x, size.y, size.z);
-        distance = maxDim * 2;
-        distance = Math.max(2, Math.min(8, distance));
+        // 如果上面都不行，可能需要组合旋转，例如：
+        object.rotation.x = Math.PI; // 当前设置：X轴旋转180度
         
         // 添加材质
         object.traverse(function(child) {
@@ -145,7 +153,12 @@ function initSingleModel(containerId, objPath) {
             }
         });
         
-        scene.add(object);
+        modelGroup.add(object);
+        
+        // 计算合适的初始相机距离
+        const maxDim = Math.max(size.x, size.y, size.z);
+        distance = maxDim * 2;
+        distance = Math.max(2, Math.min(8, distance));
     }, function(error) {
         console.error('加载模型失败:', error);
         container.innerHTML = '<p style="padding: 2rem; text-align: center; color: #999;">模型加载失败</p>';
@@ -165,12 +178,15 @@ function initSingleModel(containerId, objPath) {
     function animate() {
         requestAnimationFrame(animate);
         
-        // 更新相机位置（基于鼠标旋转和滚轮缩放）
-        const x = Math.sin(rotationY) * Math.cos(rotationX) * distance;
-        const y = Math.sin(rotationX) * distance;
-        const z = Math.cos(rotationY) * Math.cos(rotationX) * distance;
+        // 直接旋转模型组，而不是移动相机
+        // 这样更简单，也允许完全自由的360度旋转
+        if (modelGroup) {
+            modelGroup.rotation.x = modelRotationX;
+            modelGroup.rotation.y = modelRotationY;
+        }
         
-        camera.position.set(x, y, z);
+        // 相机保持在固定位置，只调整距离
+        camera.position.set(0, 0, distance);
         camera.lookAt(0, 0, 0);
         
         renderer.render(scene, camera);
