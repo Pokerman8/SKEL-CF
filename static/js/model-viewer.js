@@ -166,7 +166,7 @@ function initSingleModel(containerId, objPath, options = {}) {
         
         // 相机距离：直接控制（如果需要修改，改变下面的数值即可）
         // 距离越小，模型看起来越大；距离越大，模型看起来越小
-        distance = options.cameraDistance !== undefined ? options.cameraDistance : 2;
+        distance = options.cameraDistance !== undefined ? options.cameraDistance : 1;
     }, function(error) {
         console.error('加载模型失败:', error);
         container.innerHTML = '<p style="padding: 2rem; text-align: center; color: #999;">模型加载失败</p>';
