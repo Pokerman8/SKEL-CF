@@ -176,16 +176,6 @@ function initSingleModel(containerId, objPath, options = {}) {
     
     // 加载OBJ模型（使用简化的OBJLoader）
     loadOBJModel(objPath, function(object) {
-        // 计算模型边界，自动调整相机位置和缩放
-        const box = new THREE.Box3().setFromObject(object);
-        const center = box.getCenter(new THREE.Vector3());
-        const size = box.getSize(new THREE.Vector3());
-        
-        // 居中模型
-        object.position.sub(center);
-
-        object.rotation.x = Math.PI; // 当前设置：X轴旋转180度
-        
         // 添加材质
         object.traverse(function(child) {
             if (child.isMesh) {
@@ -198,15 +188,57 @@ function initSingleModel(containerId, objPath, options = {}) {
             }
         });
         
+        // ⚠️ 关键：确保模型以正确的顺序居中和旋转
+        // 步骤1：先添加到组中（这样可以在组坐标系中操作）
         modelGroup.add(object);
         
-        // 计算模型尺寸
+        // 步骤2：先应用旋转（如果需要）
+        object.rotation.x = Math.PI; // 当前设置：X轴旋转180度
+        
+        // 步骤3：更新世界矩阵，让旋转生效
+        object.updateMatrixWorld(true);
+        
+        // 步骤4：计算旋转后的包围盒（这样才能正确居中）
+        const box = new THREE.Box3().setFromObject(object);
+        const center = box.getCenter(new THREE.Vector3());
+        const size = box.getSize(new THREE.Vector3());
+        
+        // 步骤5：将object在modelGroup中的位置调整，使其几何中心与组原点(0,0,0)重合
+        // 这是关键：将object的position设置为负的center，这样object的几何中心就在组原点
+        object.position.sub(center);
+        
+        // 步骤6：确保modelGroup本身也在原点（旋转中心）
+        modelGroup.position.set(0, 0, 0);
+        
+        // 步骤7：应用缩放
+        modelGroup.scale.set(scale, scale, scale);
+        modelGroup.updateMatrixWorld(true);
+        
+        // 计算模型尺寸（用于相机距离计算）
         const maxDim = Math.max(size.x, size.y, size.z);
         const scaledMaxDim = maxDim * scale;
         
-        // 直接应用缩放因子控制模型大小（强制应用）
-        modelGroup.scale.set(scale, scale, scale);
-        modelGroup.updateMatrixWorld(true); // 强制更新矩阵
+        // 验证：计算最终的包围盒中心，确保在原点
+        const finalBox = new THREE.Box3().setFromObject(modelGroup);
+        const finalCenter = finalBox.getCenter(new THREE.Vector3());
+        console.log('✓ 模型居中验证:', {
+            'object在组中的位置': {
+                x: object.position.x.toFixed(4),
+                y: object.position.y.toFixed(4),
+                z: object.position.z.toFixed(4)
+            },
+            'modelGroup位置': {
+                x: modelGroup.position.x.toFixed(4),
+                y: modelGroup.position.y.toFixed(4),
+                z: modelGroup.position.z.toFixed(4)
+            },
+            '最终包围盒中心': {
+                x: finalCenter.x.toFixed(4),
+                y: finalCenter.y.toFixed(4),
+                z: finalCenter.z.toFixed(4)
+            },
+            '居中状态': finalCenter.length() < 0.01 ? '✓ 已完美居中' : '⚠️ 可能有偏差'
+        });
         
         // ⚠️ 重要：相机距离已固定，不会自动计算
         // 使用函数开始处设置的distance值，确保不会被覆盖
