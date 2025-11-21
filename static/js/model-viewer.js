@@ -39,27 +39,28 @@ function initModelViewers() {
 
 function initSingleModel(containerId, objPath, options = {}) {
     // ===== 模型大小和相机距离控制 =====
-    // ⭐⭐ 版本标记：v2.0 - 固定相机距离，无自动计算 ⭐⭐
+    // ⭐⭐ 版本标记：v3.0 - 修复版：固定参数，旋转修复 ⭐⭐
     // ⭐ 修改下面的值来直接控制模型大小和相机距离 ⭐
     
     // 缩放因子：直接控制模型大小（1.0 = 原始大小，2.0 = 2倍，30.0 = 30倍）
-    // 修改 DEFAULT_SCALE 的值来改变模型大小
+    // ⚠️ 修改 DEFAULT_SCALE 的值来改变模型大小
     const DEFAULT_SCALE = 2; // ← 改这里：模型放大倍数（建议1-50，值越大模型越大）
     const scale = options.scale !== undefined ? options.scale : DEFAULT_SCALE;
     
     // 相机距离：直接控制相机距离（固定值，不会自动计算）
     // ⚠️ 重要：距离越小，模型看起来越大；距离越大，模型看起来越小
-    // 修改 DEFAULT_DISTANCE 的值来固定相机距离
-    // 建议：设置为 2-5 左右，太小会超出视口，太大模型会很小
-    const DEFAULT_DISTANCE = 1; // ← 改这里：固定相机距离（建议1-5，值越小模型越大）
+    // ⚠️ 修改 DEFAULT_DISTANCE 的值来固定相机距离
+    // 建议：设置为 2-10 左右，太小会超出视口，太大模型会很小
+    const DEFAULT_DISTANCE = 5; // ← 改这里：固定相机距离（建议2-10，值越小模型越大）
     let distance = options.cameraDistance !== undefined ? options.cameraDistance : DEFAULT_DISTANCE;
     
     // ⚠️ 确保distance不会被自动计算覆盖（锁死距离值）
     const originalDistance = distance;
     
     // 输出初始参数值（用于调试）
-    console.log('=== 初始化模型查看器 v2.0 ===');
+    console.log('=== 初始化模型查看器 v3.0 ===');
     console.log('⭐ 固定相机距离模式（无自动计算）');
+    console.log('📌 修复：参数固定，旋转修复');
     console.log('容器ID:', containerId);
     console.log('设置的缩放因子(scale):', scale);
     console.log('设置的相机距离(distance):', distance, '(固定值，不会改变)');
@@ -123,12 +124,13 @@ function initSingleModel(containerId, objPath, options = {}) {
         const deltaX = event.clientX - lastMouseX;
         const deltaY = event.clientY - lastMouseY;
         
-        // 左右旋转（绕Y轴）
+        // ⚠️ 重要：这里修改的是旋转角度，不是位置！
+        // 左右旋转（绕Y轴）：鼠标左右移动 = 模型绕Y轴旋转
         modelRotationY += deltaX * 0.01;
-        // 上下旋转（绕X轴），允许360度自由旋转
-        modelRotationX += deltaY * 0.01;
         
-        // 不限制任何角度，允许完全自由旋转
+        // 上下旋转（绕X轴）：鼠标上下移动 = 模型绕X轴旋转
+        // 允许360度自由旋转，不限制角度
+        modelRotationX += deltaY * 0.01;
         
         lastMouseX = event.clientX;
         lastMouseY = event.clientY;
@@ -142,9 +144,20 @@ function initSingleModel(containerId, objPath, options = {}) {
     
     function onWheel(event) {
         event.preventDefault();
+        // 滚轮缩放：临时调整相机距离（不影响默认设置）
+        // 如果需要滚轮缩放，取消下面的注释
+        // 注意：这只会临时改变距离，刷新页面后会恢复默认值
+        /*
         distance += event.deltaY * 0.01;
-        // 增加相机距离范围，让模型可以更近或更远
         distance = Math.max(0.5, Math.min(50, distance));
+        */
+        
+        // 或者：调整模型缩放（推荐，不改变相机距离）
+        // 使用滚轮直接缩放模型组
+        if (modelGroup) {
+            const scaleDelta = event.deltaY > 0 ? 0.95 : 1.05; // 每次缩放5%
+            modelGroup.scale.multiplyScalar(scaleDelta);
+        }
     }
     
     // 绑定鼠标事件
@@ -252,9 +265,18 @@ function initSingleModel(containerId, objPath, options = {}) {
         requestAnimationFrame(animate);
         
         if (modelGroup) {
+            // 应用旋转到模型组（不是相机位置！）
             modelGroup.rotation.x = modelRotationX;
             modelGroup.rotation.y = modelRotationY;
+            // 确保缩放始终保持正确
+            if (modelGroup.scale.x !== scale) {
+                modelGroup.scale.set(scale, scale, scale);
+            }
         }
+        
+        // 使用原始设置的distance值，不受滚轮影响（如果需要）
+        // 如果希望滚轮可以缩放，可以注释掉下面这行
+        distance = originalDistance;
         
         camera.position.set(0, 0, distance);
         camera.lookAt(0, 0, 0);
