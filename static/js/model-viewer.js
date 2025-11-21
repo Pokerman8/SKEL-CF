@@ -162,27 +162,48 @@ function initSingleModel(containerId, objPath, options = {}) {
         // 直接应用缩放因子控制模型大小
         modelGroup.scale.set(scale, scale, scale);
         
-        // 计算相机距离（基于原始模型大小，但不完全随scale变化，让缩放效果明显）
+        // 计算相机距离：使用简单可靠的方法
         const maxDim = Math.max(size.x, size.y, size.z);
+        const scaledMaxDim = maxDim * scale; // 缩放后的模型大小
+        const viewportSize = Math.min(width, height);
         
-        // 相机距离基于原始模型大小计算，考虑一个合理的比例
-        // 这样当scale变大时，模型在视觉上会明显变大
-        if (maxDim > 0) {
-            // 基于原始模型大小的2倍作为基础相机距离
-            // 这样即使scale变化，相机距离保持相对稳定，模型缩放效果明显
-            distance = maxDim * 2;
+        // 方法1：如果缩放后的模型非常小，使用固定的近距离
+        if (scaledMaxDim > 0 && scaledMaxDim < 0.5) {
+            distance = 3; // 很小的模型，使用固定近距离
+        } 
+        // 方法2：基于视口大小计算，确保模型占据合理比例
+        else if (viewportSize > 0 && scaledMaxDim > 0) {
+            // 计算相机距离，让模型占据视口约50-70%的大小
+            const fovRad = (camera.fov * Math.PI) / 180;
+            const targetSizeRatio = 0.6; // 目标：模型占据视口60%
+            
+            // 透视投影公式：distance = (objectSize/2) / tan(fov/2) * (viewportSize / targetSizeInViewport)
+            const targetSizeInViewport = viewportSize * targetSizeRatio;
+            distance = (scaledMaxDim / 2) / Math.tan(fovRad / 2) * (viewportSize / targetSizeInViewport);
+            
+            // 如果计算出的距离太远或太近，调整到合理范围
+            if (distance > 100) {
+                // 如果距离太远，可能模型太小，使用基于模型大小的简单计算
+                distance = scaledMaxDim * 2;
+            }
+        } 
+        // 方法3：备用方案，基于缩放后的模型大小
+        else if (scaledMaxDim > 0) {
+            distance = scaledMaxDim * 2;
         } else {
-            distance = 5;
+            distance = 5; // 默认值
         }
         
-        // 确保相机距离在一个合理范围内
-        distance = Math.max(2, Math.min(50, distance));
+        // 限制相机距离在合理范围内（关键：不要太大，否则模型会太小）
+        distance = Math.max(0.5, Math.min(20, distance));
         
         console.log('模型缩放信息:', {
             '原始尺寸': {x: size.x.toFixed(2), y: size.y.toFixed(2), z: size.z.toFixed(2)},
             '最大维度': maxDim.toFixed(2),
             '缩放因子': scale,
-            '模型组缩放': {x: modelGroup.scale.x, y: modelGroup.scale.y, z: modelGroup.scale.z},
+            '缩放后大小': scaledMaxDim.toFixed(2),
+            '视口大小': viewportSize,
+            '模型组缩放': {x: modelGroup.scale.x.toFixed(2), y: modelGroup.scale.y.toFixed(2), z: modelGroup.scale.z.toFixed(2)},
             '相机距离': distance.toFixed(2)
         });
     }, function(error) {
