@@ -34,12 +34,8 @@ function initModelViewers() {
 }
 
 function initSingleModel(containerId, objPath, options = {}) {
-    // 默认选项
-    const config = {
-        scale: options.scale || 3.0, // 模型缩放因子，可以手动调整（1.0 = 默认大小，2.0 = 2倍大小，3.0 = 3倍大小）
-        useFixedScale: options.useFixedScale !== false, // 是否使用固定缩放倍数（true）或自动缩放（false）
-        ...options
-    };
+    // 缩放因子：直接控制模型大小（1.0 = 原始大小，2.0 = 2倍，3.0 = 3倍）
+    const scale = options.scale !== undefined ? options.scale : 6.0;
     
     const container = document.getElementById(containerId);
     if (!container) {
@@ -77,14 +73,13 @@ function initSingleModel(containerId, objPath, options = {}) {
     directionalLight2.position.set(-1, 0.5, -1);
     scene.add(directionalLight2);
 
-    // 简化的鼠标控制器
+    // 鼠标控制器
     let isRotating = false;
     let lastMouseX = 0;
     let lastMouseY = 0;
-    let modelRotationX = 0; // 模型在X轴的旋转（上下）
-    let modelRotationY = 0; // 模型在Y轴的旋转（左右）
+    let modelRotationX = 0;
+    let modelRotationY = 0;
     let distance = 5;
-    let modelScale = 1.0; // 模型缩放因子，控制模型大小
     
     function onMouseDown(event) {
         isRotating = true;
@@ -173,53 +168,13 @@ function initSingleModel(containerId, objPath, options = {}) {
         
         modelGroup.add(object);
         
-        // 计算合适的初始相机距离和模型缩放
+        // 直接应用缩放因子控制模型大小
+        modelGroup.scale.set(scale, scale, scale);
+        
+        // 根据缩放后的模型大小调整相机距离
         const maxDim = Math.max(size.x, size.y, size.z);
-        
-        if (config.useFixedScale) {
-            // 方式1：直接使用配置的缩放倍数（更直接，推荐）
-            modelScale = config.scale;
-            console.log('使用固定缩放倍数:', modelScale);
-        } else {
-            // 方式2：基于视口自动计算缩放，然后应用配置的倍数
-            const targetSize = Math.min(width, height) * 0.8;
-            
-            if (maxDim > 0) {
-                let autoScale = targetSize / maxDim;
-                modelScale = autoScale * config.scale;
-                console.log('使用自动缩放计算:', {
-                    autoScale: autoScale.toFixed(2),
-                    configScale: config.scale,
-                    finalScale: modelScale.toFixed(2)
-                });
-            } else {
-                modelScale = config.scale;
-            }
-        }
-        
-        // 限制缩放范围，避免过大或过小
-        modelScale = Math.max(0.1, Math.min(50, modelScale));
-        
-        // 直接设置模型组的缩放
-        modelGroup.scale.set(modelScale, modelScale, modelScale);
-        
-        // 根据缩放后的模型大小计算相机距离
-        const scaledSize = maxDim > 0 ? maxDim * modelScale : 1;
-        distance = scaledSize * 1.5; // 相机距离是模型大小的1.5倍
-        distance = Math.max(1, Math.min(200, distance)); // 扩大相机距离范围
-        
-        console.log('模型加载完成 - 缩放信息:', {
-            '原始模型尺寸': {x: size.x.toFixed(2), y: size.y.toFixed(2), z: size.z.toFixed(2)},
-            '最大维度': maxDim.toFixed(2),
-            '配置的缩放因子': config.scale,
-            '最终缩放值': modelScale.toFixed(2),
-            '模型组当前缩放': {
-                x: modelGroup.scale.x.toFixed(2),
-                y: modelGroup.scale.y.toFixed(2),
-                z: modelGroup.scale.z.toFixed(2)
-            },
-            '相机距离': distance.toFixed(2)
-        });
+        const scaledSize = maxDim * scale;
+        distance = Math.max(scaledSize * 1.5, 1);
     }, function(error) {
         console.error('加载模型失败:', error);
         container.innerHTML = '<p style="padding: 2rem; text-align: center; color: #999;">模型加载失败</p>';
@@ -239,21 +194,13 @@ function initSingleModel(containerId, objPath, options = {}) {
     function animate() {
         requestAnimationFrame(animate);
         
-        // 直接旋转模型组，而不是移动相机
-        // 这样更简单，也允许完全自由的360度旋转
         if (modelGroup) {
             modelGroup.rotation.x = modelRotationX;
             modelGroup.rotation.y = modelRotationY;
-            // 确保缩放应用正确（只在模型已加载且缩放值有效时）
-            if (modelScale > 0 && Math.abs(modelGroup.scale.x - modelScale) > 0.001) {
-                modelGroup.scale.set(modelScale, modelScale, modelScale);
-            }
         }
         
-        // 相机保持在固定位置，只调整距离
         camera.position.set(0, 0, distance);
         camera.lookAt(0, 0, 0);
-        
         renderer.render(scene, camera);
     }
     animate();
