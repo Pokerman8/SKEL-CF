@@ -43,14 +43,15 @@ function initSingleModel(containerId, objPath, options = {}) {
     
     // 缩放因子：直接控制模型大小（1.0 = 原始大小，2.0 = 2倍，10.0 = 10倍）
     // 修改 DEFAULT_SCALE 的值来改变模型大小
-    const DEFAULT_SCALE = 15; // ← 改这里：模型放大倍数（建议1-50）
+    const DEFAULT_SCALE = 20; // ← 改这里：模型放大倍数（建议1-50）
     const scale = options.scale !== undefined ? options.scale : DEFAULT_SCALE;
     
-    // 相机距离：直接控制相机距离（如果不指定，会自动计算合适的距离）
-    // 距离越小，模型看起来越大；距离越大，模型看起来越小
-    // 修改 DEFAULT_DISTANCE 的值来固定相机距离（如果设置为null，则自动计算）
-    const DEFAULT_DISTANCE = null; // ← 改这里：null=自动计算，或设置为数字如 5, 10 等
-    let distance = options.cameraDistance !== undefined ? options.cameraDistance : (DEFAULT_DISTANCE !== null ? DEFAULT_DISTANCE : 5);
+    // 相机距离：直接控制相机距离
+    // ⚠️ 重要：距离越小，模型看起来越大；距离越大，模型看起来越小
+    // 修改 DEFAULT_DISTANCE 的值来固定相机距离
+    // 建议：根据模型大小，距离设置为 2-5 左右，太小会超出视口
+    const DEFAULT_DISTANCE = 3; // ← 改这里：固定相机距离（建议2-10）
+    let distance = options.cameraDistance !== undefined ? options.cameraDistance : DEFAULT_DISTANCE;
     
     // 输出初始参数值（用于调试）
     console.log('=== 初始化模型查看器 ===');
@@ -189,27 +190,25 @@ function initSingleModel(containerId, objPath, options = {}) {
         modelGroup.scale.set(scale, scale, scale);
         modelGroup.updateMatrixWorld(true); // 强制更新矩阵
         
-        // 根据缩放后的模型大小自动调整相机距离（如果未明确指定）
+        // 注意：相机距离已在函数开始处设置，这里直接使用
+        // 如果需要自动计算，可以取消下面的注释并注释掉上面的DEFAULT_DISTANCE
+        /*
+        // 自动计算相机距离（可选）
         if (options.cameraDistance === undefined) {
-            // 让缩放后的模型占据视口的约50-60%，计算合适的相机距离
             const viewportSize = Math.min(width, height);
             const fovRad = (camera.fov * Math.PI) / 180;
-            const targetSizeRatio = 0.6; // 模型占据视口60%
+            const targetSizeRatio = 0.7; // 模型占据视口70%（更大）
             const targetSizeInViewport = viewportSize * targetSizeRatio;
-            
-            // 计算相机距离：让缩放后的模型占据视口约60%
             const autoDistance = (scaledMaxDim / 2) / Math.tan(fovRad / 2) * (viewportSize / targetSizeInViewport);
             
-            // 如果自动计算的距离合理，使用它
-            if (autoDistance > 0.5 && autoDistance < 100 && !isNaN(autoDistance) && isFinite(autoDistance)) {
+            // 限制自动计算的距离，不要太大
+            if (autoDistance > 1 && autoDistance < 20 && !isNaN(autoDistance) && isFinite(autoDistance)) {
                 distance = autoDistance;
                 console.log('✓ 自动计算相机距离:', autoDistance.toFixed(2));
-            } else {
-                console.log('✓ 使用默认相机距离:', distance.toFixed(2));
             }
-        } else {
-            console.log('✓ 使用指定的相机距离:', distance.toFixed(2));
         }
+        */
+        console.log('✓ 使用相机距离:', distance.toFixed(2));
         
         // 更新相机位置（确保使用最新的distance值）
         camera.position.set(0, 0, distance);
