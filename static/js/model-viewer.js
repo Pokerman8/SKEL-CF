@@ -162,20 +162,21 @@ function initSingleModel(containerId, objPath, options = {}) {
         // 直接应用缩放因子控制模型大小
         modelGroup.scale.set(scale, scale, scale);
         
-        // 计算相机距离（保持固定距离，让缩放效果明显）
-        // 相机距离基于原始模型大小，不随缩放因子变化，这样改变scale才能看到视觉上的变化
+        // 计算相机距离（基于原始模型大小，但不完全随scale变化，让缩放效果明显）
         const maxDim = Math.max(size.x, size.y, size.z);
-        const viewportSize = Math.min(width, height);
         
-        // 根据视口大小和原始模型大小计算合适的相机距离
-        // 这样无论scale如何变化，相机位置相对固定，模型缩放效果才能明显
-        if (maxDim > 0 && viewportSize > 0) {
-            // 计算一个合理的相机距离，基于视口大小和相机视野角度
-            const fovRad = (camera.fov * Math.PI) / 180;
-            distance = (viewportSize * 0.5) / Math.tan(fovRad / 2);
+        // 相机距离基于原始模型大小计算，考虑一个合理的比例
+        // 这样当scale变大时，模型在视觉上会明显变大
+        if (maxDim > 0) {
+            // 基于原始模型大小的2倍作为基础相机距离
+            // 这样即使scale变化，相机距离保持相对稳定，模型缩放效果明显
+            distance = maxDim * 2;
         } else {
             distance = 5;
         }
+        
+        // 确保相机距离在一个合理范围内
+        distance = Math.max(2, Math.min(50, distance));
         
         console.log('模型缩放信息:', {
             '原始尺寸': {x: size.x.toFixed(2), y: size.y.toFixed(2), z: size.z.toFixed(2)},
