@@ -142,16 +142,7 @@ function initSingleModel(containerId, objPath, options = {}) {
         
         // 居中模型
         object.position.sub(center);
-        
-        // 修复上下颠倒：尝试不同的旋转方式
-        // 如果模型上下颠倒，可以取消下面某个选项的注释来尝试：
-        // object.rotation.x = Math.PI;     // X轴旋转180度
-        // object.rotation.y = Math.PI;     // Y轴旋转180度  
-        // object.rotation.z = Math.PI;     // Z轴旋转180度
-        // object.rotation.x = Math.PI / 2; // X轴旋转90度
-        // object.rotation.z = Math.PI / 2; // Z轴旋转90度
-        
-        // 如果上面都不行，可能需要组合旋转，例如：
+
         object.rotation.x = Math.PI; // 当前设置：X轴旋转180度
         
         // 添加材质
@@ -171,10 +162,28 @@ function initSingleModel(containerId, objPath, options = {}) {
         // 直接应用缩放因子控制模型大小
         modelGroup.scale.set(scale, scale, scale);
         
-        // 根据缩放后的模型大小调整相机距离
+        // 计算相机距离（保持固定距离，让缩放效果明显）
+        // 相机距离基于原始模型大小，不随缩放因子变化，这样改变scale才能看到视觉上的变化
         const maxDim = Math.max(size.x, size.y, size.z);
-        const scaledSize = maxDim * scale;
-        distance = Math.max(scaledSize * 1.5, 1);
+        const viewportSize = Math.min(width, height);
+        
+        // 根据视口大小和原始模型大小计算合适的相机距离
+        // 这样无论scale如何变化，相机位置相对固定，模型缩放效果才能明显
+        if (maxDim > 0 && viewportSize > 0) {
+            // 计算一个合理的相机距离，基于视口大小和相机视野角度
+            const fovRad = (camera.fov * Math.PI) / 180;
+            distance = (viewportSize * 0.5) / Math.tan(fovRad / 2);
+        } else {
+            distance = 5;
+        }
+        
+        console.log('模型缩放信息:', {
+            '原始尺寸': {x: size.x.toFixed(2), y: size.y.toFixed(2), z: size.z.toFixed(2)},
+            '最大维度': maxDim.toFixed(2),
+            '缩放因子': scale,
+            '模型组缩放': {x: modelGroup.scale.x, y: modelGroup.scale.y, z: modelGroup.scale.z},
+            '相机距离': distance.toFixed(2)
+        });
     }, function(error) {
         console.error('加载模型失败:', error);
         container.innerHTML = '<p style="padding: 2rem; text-align: center; color: #999;">模型加载失败</p>';
