@@ -36,7 +36,8 @@ function initModelViewers() {
 function initSingleModel(containerId, objPath, options = {}) {
     // 默认选项
     const config = {
-        scale: options.scale || 3.0, // 模型缩放因子，可以手动调整（1.0 = 默认大小，2.0 = 2倍大小）
+        scale: options.scale || 3.0, // 模型缩放因子，可以手动调整（1.0 = 默认大小，2.0 = 2倍大小，3.0 = 3倍大小）
+        useFixedScale: options.useFixedScale !== false, // 是否使用固定缩放倍数（true）或自动缩放（false）
         ...options
     };
     
@@ -175,28 +176,49 @@ function initSingleModel(containerId, objPath, options = {}) {
         // 计算合适的初始相机距离和模型缩放
         const maxDim = Math.max(size.x, size.y, size.z);
         
-        // 如果模型太小，通过缩放来增大显示
-        // 计算合适的缩放比例，使模型占满约80%的视口
-        const targetSize = Math.min(width, height) * 0.8;
-        let autoScale = targetSize / maxDim;
-        
-        // 应用用户指定的缩放因子和自动计算的缩放
-        modelScale = autoScale * config.scale;
+        if (config.useFixedScale) {
+            // 方式1：直接使用配置的缩放倍数（更直接，推荐）
+            modelScale = config.scale;
+            console.log('使用固定缩放倍数:', modelScale);
+        } else {
+            // 方式2：基于视口自动计算缩放，然后应用配置的倍数
+            const targetSize = Math.min(width, height) * 0.8;
+            
+            if (maxDim > 0) {
+                let autoScale = targetSize / maxDim;
+                modelScale = autoScale * config.scale;
+                console.log('使用自动缩放计算:', {
+                    autoScale: autoScale.toFixed(2),
+                    configScale: config.scale,
+                    finalScale: modelScale.toFixed(2)
+                });
+            } else {
+                modelScale = config.scale;
+            }
+        }
         
         // 限制缩放范围，避免过大或过小
-        modelScale = Math.max(0.1, Math.min(20, modelScale));
+        modelScale = Math.max(0.1, Math.min(50, modelScale));
+        
+        // 直接设置模型组的缩放
         modelGroup.scale.set(modelScale, modelScale, modelScale);
         
         // 根据缩放后的模型大小计算相机距离
-        const scaledSize = maxDim * modelScale;
+        const scaledSize = maxDim > 0 ? maxDim * modelScale : 1;
         distance = scaledSize * 1.5; // 相机距离是模型大小的1.5倍
-        distance = Math.max(1, Math.min(100, distance)); // 扩大相机距离范围
+        distance = Math.max(1, Math.min(200, distance)); // 扩大相机距离范围
         
-        console.log('模型加载完成:', {
-            size: size,
-            maxDim: maxDim,
-            modelScale: modelScale,
-            distance: distance
+        console.log('模型加载完成 - 缩放信息:', {
+            '原始模型尺寸': {x: size.x.toFixed(2), y: size.y.toFixed(2), z: size.z.toFixed(2)},
+            '最大维度': maxDim.toFixed(2),
+            '配置的缩放因子': config.scale,
+            '最终缩放值': modelScale.toFixed(2),
+            '模型组当前缩放': {
+                x: modelGroup.scale.x.toFixed(2),
+                y: modelGroup.scale.y.toFixed(2),
+                z: modelGroup.scale.z.toFixed(2)
+            },
+            '相机距离': distance.toFixed(2)
         });
     }, function(error) {
         console.error('加载模型失败:', error);
@@ -222,8 +244,8 @@ function initSingleModel(containerId, objPath, options = {}) {
         if (modelGroup) {
             modelGroup.rotation.x = modelRotationX;
             modelGroup.rotation.y = modelRotationY;
-            // 确保缩放应用正确
-            if (modelGroup.scale.x !== modelScale) {
+            // 确保缩放应用正确（只在模型已加载且缩放值有效时）
+            if (modelScale > 0 && Math.abs(modelGroup.scale.x - modelScale) > 0.001) {
                 modelGroup.scale.set(modelScale, modelScale, modelScale);
             }
         }
