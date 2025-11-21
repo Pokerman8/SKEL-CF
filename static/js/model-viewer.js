@@ -44,14 +44,14 @@ function initSingleModel(containerId, objPath, options = {}) {
     
     // 缩放因子：直接控制模型大小（1.0 = 原始大小，2.0 = 2倍，30.0 = 30倍）
     // 修改 DEFAULT_SCALE 的值来改变模型大小
-    const DEFAULT_SCALE = 20; // ← 改这里：模型放大倍数（建议1-50，值越大模型越大）
+    const DEFAULT_SCALE = 2; // ← 改这里：模型放大倍数（建议1-50，值越大模型越大）
     const scale = options.scale !== undefined ? options.scale : DEFAULT_SCALE;
     
     // 相机距离：直接控制相机距离（固定值，不会自动计算）
     // ⚠️ 重要：距离越小，模型看起来越大；距离越大，模型看起来越小
     // 修改 DEFAULT_DISTANCE 的值来固定相机距离
     // 建议：设置为 2-5 左右，太小会超出视口，太大模型会很小
-    const DEFAULT_DISTANCE = 5; // ← 改这里：固定相机距离（建议1-5，值越小模型越大）
+    const DEFAULT_DISTANCE = 1; // ← 改这里：固定相机距离（建议1-5，值越小模型越大）
     let distance = options.cameraDistance !== undefined ? options.cameraDistance : DEFAULT_DISTANCE;
     
     // ⚠️ 确保distance不会被自动计算覆盖（锁死距离值）
