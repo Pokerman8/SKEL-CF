@@ -38,11 +38,25 @@ function initModelViewers() {
 }
 
 function initSingleModel(containerId, objPath, options = {}) {
-    // 缩放因子：直接控制模型大小（1.0 = 原始大小，2.0 = 2倍，3.0 = 3倍）
-    const scale = options.scale !== undefined ? options.scale : 6;
-    // 相机距离：直接控制相机距离（默认值：5，可在options中通过cameraDistance参数传入）
+    // ===== 模型大小和相机距离控制 =====
+    // 缩放因子：直接控制模型大小（1.0 = 原始大小，2.0 = 2倍，6.0 = 6倍）
+    // 修改下面的默认值来改变模型大小
+    const DEFAULT_SCALE = 10; // 临时设置为10，非常明显
+    const scale = options.scale !== undefined ? options.scale : DEFAULT_SCALE;
+    
+    // 相机距离：直接控制相机距离（默认值：2，可在options中通过cameraDistance参数传入）
     // 距离越小，模型看起来越大；距离越大，模型看起来越小
-    let distance = options.cameraDistance !== undefined ? options.cameraDistance : 2;
+    // 修改下面的默认值来改变相机距离
+    const DEFAULT_DISTANCE = 1; // 临时设置为1，非常近
+    let distance = options.cameraDistance !== undefined ? options.cameraDistance : DEFAULT_DISTANCE;
+    
+    // 输出初始参数值（用于调试）
+    console.log('=== 初始化模型查看器 ===');
+    console.log('容器ID:', containerId);
+    console.log('设置的缩放因子(scale):', scale);
+    console.log('设置的相机距离(distance):', distance);
+    console.log('传入的options:', options);
+    console.log('========================');
     
     const container = document.getElementById(containerId);
     if (!container) {
@@ -165,29 +179,35 @@ function initSingleModel(containerId, objPath, options = {}) {
         
         modelGroup.add(object);
         
-        // 直接应用缩放因子控制模型大小
+        // 直接应用缩放因子控制模型大小（强制应用）
         modelGroup.scale.set(scale, scale, scale);
+        modelGroup.updateMatrixWorld(true); // 强制更新矩阵
+        
+        // 更新相机位置（确保使用最新的distance值）
+        camera.position.set(0, 0, distance);
+        camera.lookAt(0, 0, 0);
+        camera.updateProjectionMatrix();
         
         // 输出调试信息，确认参数已正确应用
-        console.log('模型加载完成，参数设置:', {
-            '缩放因子(scale)': scale,
-            '相机距离(distance)': distance,
-            '模型组缩放': {
-                x: modelGroup.scale.x,
-                y: modelGroup.scale.y,
-                z: modelGroup.scale.z
-            },
-            '相机位置': {
-                x: camera.position.x,
-                y: camera.position.y,
-                z: camera.position.z
-            },
-            '模型原始尺寸': {
-                x: size.x.toFixed(2),
-                y: size.y.toFixed(2),
-                z: size.z.toFixed(2)
-            }
+        console.log('=== 模型加载完成，参数设置 ===');
+        console.log('缩放因子(scale):', scale);
+        console.log('相机距离(distance):', distance);
+        console.log('模型组缩放:', {
+            x: modelGroup.scale.x,
+            y: modelGroup.scale.y,
+            z: modelGroup.scale.z
         });
+        console.log('相机位置:', {
+            x: camera.position.x,
+            y: camera.position.y,
+            z: camera.position.z
+        });
+        console.log('模型原始尺寸:', {
+            x: size.x.toFixed(2),
+            y: size.y.toFixed(2),
+            z: size.z.toFixed(2)
+        });
+        console.log('============================');
     }, function(error) {
         console.error('加载模型失败:', error);
         container.innerHTML = '<p style="padding: 2rem; text-align: center; color: #999;">模型加载失败</p>';
