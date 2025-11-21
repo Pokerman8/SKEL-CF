@@ -35,7 +35,7 @@ function initModelViewers() {
 
 function initSingleModel(containerId, objPath, options = {}) {
     // 缩放因子：直接控制模型大小（1.0 = 原始大小，2.0 = 2倍，3.0 = 3倍）
-    const scale = options.scale !== undefined ? options.scale : 1.0;
+    const scale = options.scale !== undefined ? options.scale : 0.5;
     
     const container = document.getElementById(containerId);
     if (!container) {
