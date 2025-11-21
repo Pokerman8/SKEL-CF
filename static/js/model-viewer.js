@@ -39,27 +39,32 @@ function initModelViewers() {
 
 function initSingleModel(containerId, objPath, options = {}) {
     // ===== 模型大小和相机距离控制 =====
+    // ⭐⭐ 版本标记：v2.0 - 固定相机距离，无自动计算 ⭐⭐
     // ⭐ 修改下面的值来直接控制模型大小和相机距离 ⭐
     
-    // 缩放因子：直接控制模型大小（1.0 = 原始大小，2.0 = 2倍，10.0 = 10倍）
+    // 缩放因子：直接控制模型大小（1.0 = 原始大小，2.0 = 2倍，30.0 = 30倍）
     // 修改 DEFAULT_SCALE 的值来改变模型大小
-    const DEFAULT_SCALE = 20; // ← 改这里：模型放大倍数（建议1-50）
+    const DEFAULT_SCALE = 30; // ← 改这里：模型放大倍数（建议1-50，值越大模型越大）
     const scale = options.scale !== undefined ? options.scale : DEFAULT_SCALE;
     
-    // 相机距离：直接控制相机距离
+    // 相机距离：直接控制相机距离（固定值，不会自动计算）
     // ⚠️ 重要：距离越小，模型看起来越大；距离越大，模型看起来越小
     // 修改 DEFAULT_DISTANCE 的值来固定相机距离
-    // 建议：根据模型大小，距离设置为 2-5 左右，太小会超出视口
-    const DEFAULT_DISTANCE = 3; // ← 改这里：固定相机距离（建议2-10）
+    // 建议：设置为 2-5 左右，太小会超出视口，太大模型会很小
+    const DEFAULT_DISTANCE = 2; // ← 改这里：固定相机距离（建议1-5，值越小模型越大）
     let distance = options.cameraDistance !== undefined ? options.cameraDistance : DEFAULT_DISTANCE;
     
+    // ⚠️ 确保distance不会被自动计算覆盖（锁死距离值）
+    const originalDistance = distance;
+    
     // 输出初始参数值（用于调试）
-    console.log('=== 初始化模型查看器 ===');
+    console.log('=== 初始化模型查看器 v2.0 ===');
+    console.log('⭐ 固定相机距离模式（无自动计算）');
     console.log('容器ID:', containerId);
     console.log('设置的缩放因子(scale):', scale);
-    console.log('设置的相机距离(distance):', distance);
+    console.log('设置的相机距离(distance):', distance, '(固定值，不会改变)');
     console.log('传入的options:', options);
-    console.log('========================');
+    console.log('=============================');
     
     const container = document.getElementById(containerId);
     if (!container) {
@@ -190,25 +195,10 @@ function initSingleModel(containerId, objPath, options = {}) {
         modelGroup.scale.set(scale, scale, scale);
         modelGroup.updateMatrixWorld(true); // 强制更新矩阵
         
-        // 注意：相机距离已在函数开始处设置，这里直接使用
-        // 如果需要自动计算，可以取消下面的注释并注释掉上面的DEFAULT_DISTANCE
-        /*
-        // 自动计算相机距离（可选）
-        if (options.cameraDistance === undefined) {
-            const viewportSize = Math.min(width, height);
-            const fovRad = (camera.fov * Math.PI) / 180;
-            const targetSizeRatio = 0.7; // 模型占据视口70%（更大）
-            const targetSizeInViewport = viewportSize * targetSizeRatio;
-            const autoDistance = (scaledMaxDim / 2) / Math.tan(fovRad / 2) * (viewportSize / targetSizeInViewport);
-            
-            // 限制自动计算的距离，不要太大
-            if (autoDistance > 1 && autoDistance < 20 && !isNaN(autoDistance) && isFinite(autoDistance)) {
-                distance = autoDistance;
-                console.log('✓ 自动计算相机距离:', autoDistance.toFixed(2));
-            }
-        }
-        */
-        console.log('✓ 使用相机距离:', distance.toFixed(2));
+        // ⚠️ 重要：相机距离已固定，不会自动计算
+        // 使用函数开始处设置的distance值，确保不会被覆盖
+        distance = originalDistance; // 强制使用原始设置的distance值
+        console.log('✓ 使用固定的相机距离:', distance.toFixed(2), '(已锁定，不会被自动计算覆盖)');
         
         // 更新相机位置（确保使用最新的distance值）
         camera.position.set(0, 0, distance);
