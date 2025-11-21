@@ -39,7 +39,7 @@ function initModelViewers() {
 
 function initSingleModel(containerId, objPath, options = {}) {
     // 缩放因子：直接控制模型大小（1.0 = 原始大小，2.0 = 2倍，3.0 = 3倍）
-    const scale = options.scale !== undefined ? options.scale : 1;
+    const scale = options.scale !== undefined ? options.scale : 3;
     // 相机距离：直接控制相机距离（默认值：5，可在options中通过cameraDistance参数传入）
     // 距离越小，模型看起来越大；距离越大，模型看起来越小
     let distance = options.cameraDistance !== undefined ? options.cameraDistance : 2;
