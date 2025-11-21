@@ -92,8 +92,8 @@ function initSingleModel(containerId, objPath) {
         rotationY += deltaX * 0.01;
         rotationX += deltaY * 0.01;
         
-        // 允许360度自由旋转（移除上下旋转限制）
-        // rotationX 可以自由旋转，不设限制
+        // 限制垂直旋转角度
+        rotationX = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, rotationX));
         
         lastMouseX = event.clientX;
         lastMouseY = event.clientY;
@@ -124,9 +124,6 @@ function initSingleModel(containerId, objPath) {
         
         // 居中模型
         object.position.sub(center);
-        
-        // 修复上下颠倒问题：绕X轴旋转180度
-        object.rotation.x = Math.PI;
         
         // 计算合适的初始相机距离
         const maxDim = Math.max(size.x, size.y, size.z);
