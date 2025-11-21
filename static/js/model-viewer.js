@@ -33,7 +33,13 @@ function initModelViewers() {
     });
 }
 
-function initSingleModel(containerId, objPath) {
+function initSingleModel(containerId, objPath, options = {}) {
+    // 默认选项
+    const config = {
+        scale: options.scale || 1.0, // 模型缩放因子，可以手动调整（1.0 = 默认大小，2.0 = 2倍大小）
+        ...options
+    };
+    
     const container = document.getElementById(containerId);
     if (!container) {
         console.warn('容器不存在:', containerId);
@@ -77,15 +83,19 @@ function initSingleModel(containerId, objPath) {
     let modelRotationX = 0; // 模型在X轴的旋转（上下）
     let modelRotationY = 0; // 模型在Y轴的旋转（左右）
     let distance = 5;
+    let modelScale = 1.0; // 模型缩放因子，控制模型大小
     
     function onMouseDown(event) {
         isRotating = true;
         lastMouseX = event.clientX;
         lastMouseY = event.clientY;
+        renderer.domElement.style.cursor = 'grabbing';
+        event.preventDefault();
     }
     
     function onMouseMove(event) {
         if (!isRotating) return;
+        
         const deltaX = event.clientX - lastMouseX;
         const deltaY = event.clientY - lastMouseY;
         
@@ -98,31 +108,38 @@ function initSingleModel(containerId, objPath) {
         
         lastMouseX = event.clientX;
         lastMouseY = event.clientY;
+        event.preventDefault();
     }
     
-    function onMouseUp() {
+    function onMouseUp(event) {
         isRotating = false;
+        renderer.domElement.style.cursor = 'grab';
     }
     
     function onWheel(event) {
         event.preventDefault();
         distance += event.deltaY * 0.01;
-        distance = Math.max(1, Math.min(10, distance));
+        // 增加相机距离范围，让模型可以更近或更远
+        distance = Math.max(0.5, Math.min(50, distance));
     }
     
+    // 绑定鼠标事件
+    // mousedown 只绑定到canvas，开始拖拽
     renderer.domElement.addEventListener('mousedown', onMouseDown);
+    // mousemove 和 mouseup 绑定到document，确保拖拽过程中即使鼠标移出canvas也能继续工作
     document.addEventListener('mousemove', onMouseMove);
     document.addEventListener('mouseup', onMouseUp);
+    // wheel 事件绑定到canvas，用于缩放
     renderer.domElement.addEventListener('wheel', onWheel);
     renderer.domElement.style.cursor = 'grab';
 
-    // 创建一个组来包含模型，便于统一控制旋转
+    // 创建一个组来包含模型，便于统一控制旋转和缩放
     const modelGroup = new THREE.Group();
     scene.add(modelGroup);
     
     // 加载OBJ模型（使用简化的OBJLoader）
     loadOBJModel(objPath, function(object) {
-        // 计算模型边界，自动调整相机位置
+        // 计算模型边界，自动调整相机位置和缩放
         const box = new THREE.Box3().setFromObject(object);
         const center = box.getCenter(new THREE.Vector3());
         const size = box.getSize(new THREE.Vector3());
@@ -155,10 +172,32 @@ function initSingleModel(containerId, objPath) {
         
         modelGroup.add(object);
         
-        // 计算合适的初始相机距离
+        // 计算合适的初始相机距离和模型缩放
         const maxDim = Math.max(size.x, size.y, size.z);
-        distance = maxDim * 2;
-        distance = Math.max(2, Math.min(8, distance));
+        
+        // 如果模型太小，通过缩放来增大显示
+        // 计算合适的缩放比例，使模型占满约80%的视口
+        const targetSize = Math.min(width, height) * 0.8;
+        let autoScale = targetSize / maxDim;
+        
+        // 应用用户指定的缩放因子和自动计算的缩放
+        modelScale = autoScale * config.scale;
+        
+        // 限制缩放范围，避免过大或过小
+        modelScale = Math.max(0.1, Math.min(20, modelScale));
+        modelGroup.scale.set(modelScale, modelScale, modelScale);
+        
+        // 根据缩放后的模型大小计算相机距离
+        const scaledSize = maxDim * modelScale;
+        distance = scaledSize * 1.5; // 相机距离是模型大小的1.5倍
+        distance = Math.max(1, Math.min(100, distance)); // 扩大相机距离范围
+        
+        console.log('模型加载完成:', {
+            size: size,
+            maxDim: maxDim,
+            modelScale: modelScale,
+            distance: distance
+        });
     }, function(error) {
         console.error('加载模型失败:', error);
         container.innerHTML = '<p style="padding: 2rem; text-align: center; color: #999;">模型加载失败</p>';
@@ -183,6 +222,10 @@ function initSingleModel(containerId, objPath) {
         if (modelGroup) {
             modelGroup.rotation.x = modelRotationX;
             modelGroup.rotation.y = modelRotationY;
+            // 确保缩放应用正确
+            if (modelGroup.scale.x !== modelScale) {
+                modelGroup.scale.set(modelScale, modelScale, modelScale);
+            }
         }
         
         // 相机保持在固定位置，只调整距离
