@@ -126,7 +126,7 @@ function initSingleModel(containerId, objPath) {
         object.position.sub(center);
         
         // 修正上下颠倒：绕X轴旋转180度
-        object.rotation.x = Math.PI;
+        object.rotation.y = Math.PI;
         
         // 计算合适的初始相机距离
         const maxDim = Math.max(size.x, size.y, size.z);
