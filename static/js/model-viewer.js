@@ -17,23 +17,13 @@ function initModelViewers() {
     // OBJ文件路径配置
     const modelConfigs = [
         { 
-            containerId: 'model-viewer-1', 
-            objPath: './static/obj/01_dance_000008.obj',
-            title: 'Dance Model'
-        },
-        { 
-            containerId: 'model-viewer-2', 
-            objPath: './static/obj/HSMR-pexels-willians_photography-2157111846-34620975.jpg_inst00_skel.obj',
-            title: 'HSMR Skeleton'
-        },
-        { 
-            containerId: 'model-viewer-3', 
-            objPath: './static/obj/pexels-willians_photography-2157111846-34620975_skel.obj',
+            containerId: 'model-viewer-skeleton', 
+            objPath: './static/obj/dancer-skelcf-skeleton.obj',
             title: 'SKEL Skeleton'
         },
         { 
-            containerId: 'model-viewer-4', 
-            objPath: './static/obj/pexels-willians_photography-2157111846-34620975_skin.obj',
+            containerId: 'model-viewer-skin', 
+            objPath: './static/obj/dancer-skelcf-skin.obj',
             title: 'SKEL Skin'
         }
     ];
