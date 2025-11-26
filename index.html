@@ -228,13 +228,7 @@
         <img src="./static/images/teaser.jpg" width="100%" style="margin-bottom: 1.5rem;" />
         <div class="content has-text-left">
           <p>
-            Parametric 3D human models such as SMPL have driven major advances in human pose and shape estimation, yet their simplified kinematics limit biomechanical fidelity. The recently proposed SKEL model addresses this by re-rigging SMPL with an anatomically realistic skeleton. However, estimating SKEL parameters directly remains challenging due to limited training data, perspective ambiguities, and complex human articulation.
-          </p>
-          <p>
-            We introduce SKEL-CF, a coarse-to-fine SKEL estimation framework that enables robust biomechanical human modeling from images. We adopt a transformer-based encoder–decoder architecture in which the encoder predicts coarse camera, SKEL parameters, and the decoder progressively refines them. To provide anatomically reliable supervision, we convert SMPL-based datasets into SKEL-consistent ground truth, ensuring unified skeleton–mesh alignment. To further resolve depth and scale ambiguities, we explicitly model the camera within the SKEL-CF pipeline and demonstrate its importance with diverse viewpoints.
-          </p>
-          <p>
-            Extensive experiments show that SKEL-CF significantly advances practical SKEL estimation in the wild. On the challenging MOYO dataset, SKEL-CF achieves 85.0 MPJPE / 51.4 PA-MPJPE, outperforming HSMR (104.5 / 79.6). Our framework enables scalable and anatomically realistic human motion analysis, bridging computer vision and biomechanics applications. Our code will be released upon publication.
+            Parametric 3D human models such as SMPL have driven major advances in human pose and shape estimation, yet their simplified kinematics limit biomechanical fidelity. The recently proposed SKEL model addresses this by re-rigging SMPL with an anatomically realistic skeleton. However, estimating SKEL parameters directly remains challenging due to limited training data, perspective ambiguities, and complex human articulation. We introduce SKEL-CF, a coarse-to-fine SKEL estimation framework that enables robust biomechanical human modeling from images. We adopt a transformer-based encoder–decoder architecture in which the encoder predicts coarse camera, SKEL parameters, and the decoder progressively refines them. To provide anatomically reliable supervision, we convert SMPL-based datasets into SKEL-consistent ground truth, ensuring unified skeleton–mesh alignment. To further resolve depth and scale ambiguities, we explicitly model the camera within the SKEL-CF pipeline and demonstrate its importance with diverse viewpoints. Extensive experiments show that SKEL-CF significantly advances practical SKEL estimation in the wild. On the challenging MOYO dataset, SKEL-CF achieves 85.0 MPJPE / 51.4 PA-MPJPE, outperforming HSMR (104.5 / 79.6). Our framework enables scalable and anatomically realistic human motion analysis, bridging computer vision and biomechanics applications. Our code will be released upon publication.
           </p>
         </div>
       </div>
@@ -245,7 +239,10 @@
     <div class="columns">
       <div class="column is-12">
         <h2 class="title is-3">Method</h2>
-        <img src="./static/images/pipline.jpg" width="100%" style="margin-bottom: 1.5rem;" />
+        <img src="./static/images/pipline.jpg" width="100%" style="margin-bottom: 0.5rem;" />
+        <p style="text-align: center; font-size: 0.9em; color: #666; margin-bottom: 1.5rem;">
+          <strong>Overview of the proposed SKEL-CF.</strong> Our method estimates SKEL parameters from a single image using an encoder–decoder architecture that performs coarse-to-fine estimation. The encoder produces initial predictions of the camera extrinsics <span style="font-style: italic;">π</span>, shape parameters <span style="font-style: italic;">β</span>, and pose parameters <span style="font-style: italic;">θ</span>. The decoder then refines these predictions progressively across layers. In addition, we adopt the camera model from CameraHMR to estimate the camera intrinsics.
+        </p>
         <div class="carousel results-carousel" style="margin-bottom: 1.5rem;">
           <div class="item item-layer-1">
             <img src="./static/images/per-layer-1.gif" width="100%" style="display: block;" />
@@ -265,9 +262,6 @@
         </div>
         <hr style="margin-top: 0px; margin-bottom: 1.5rem;" />
         <div class="content has-text-left">
-          <p>
-            <strong>Overview of the proposed SKEL-CF.</strong> Our method estimates SKEL parameters from a single image using an encoder–decoder architecture that performs coarse-to-fine estimation. The encoder produces initial predictions of the camera extrinsics <span style="font-style: italic;">π</span>, shape parameters <span style="font-style: italic;">β</span>, and pose parameters <span style="font-style: italic;">θ</span>. The decoder then refines these predictions progressively across layers. In addition, we adopt the camera model from CameraHMR to estimate the camera intrinsics.
-          </p>
         </div>
       </div>
     </div>
