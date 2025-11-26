@@ -240,7 +240,7 @@
       <div class="column is-12">
         <h2 class="title is-3">Method</h2>
         <img src="./static/images/pipline.jpg" width="100%" style="margin-bottom: 0.5rem;" />
-        <p style="text-align: center; font-size: 0.9em; color: #666; margin-bottom: 1.5rem;">
+        <p style="text-align: left; font-size: 0.9em; color: #666; margin-bottom: 1.5rem;">
           <strong>Overview of the proposed SKEL-CF.</strong> Our method estimates SKEL parameters from a single image using an encoder–decoder architecture that performs coarse-to-fine estimation. The encoder produces initial predictions of the camera extrinsics <span style="font-style: italic;">π</span>, shape parameters <span style="font-style: italic;">β</span>, and pose parameters <span style="font-style: italic;">θ</span>. The decoder then refines these predictions progressively across layers. In addition, we adopt the camera model from CameraHMR to estimate the camera intrinsics.
         </p>
         <div class="carousel results-carousel" style="margin-bottom: 1.5rem;">
@@ -471,29 +471,28 @@
   </div>
 </section>
 
-
+-->
 <section class="section" id="BibTeX">
   <div class="container is-max-desktop content">
     <h2 class="title">BibTeX</h2>
-    <pre><code>@article{park2021nerfies,
-  author    = {Park, Keunhong and Sinha, Utkarsh and Barron, Jonathan T. and Bouaziz, Sofien and Goldman, Dan B and Seitz, Steven M. and Martin-Brualla, Ricardo},
-  title     = {Nerfies: Deformable Neural Radiance Fields},
-  journal   = {ICCV},
-  year      = {2021},
+    <pre><code>@article{li2025skelcf,
+  author={Li, Da and Jin, Ji-Ping and Yu, Xuanlong and Liu, Wei and Cun, Xiaodong and Chen, Kai and Fan, Rui and Kong, Jiangang and Shen, Xi},
+  title     ={SKEL-CF: Coarse-to-Fine Biomechanical Skeleton and Surface Mesh Recovery},
+  journal   ={arXiv},
+  year      = {2025},
 }</code></pre>
   </div>
 </section>
 
--->
 
 <footer class="footer">
   <div class="container">
     <div class="content has-text-centered">
       <a class="icon-link"
-         href="./static/videos/nerfies_paper.pdf">
+         href="https://arxiv.org/abs/2511.20157">
         <i class="fas fa-file-pdf"></i>
       </a>
-      <a class="icon-link" href="https://github.com/keunhong" class="external-link" disabled>
+      <a class="icon-link" href="https://github.com/Intellindust-AI-Lab/SKEL-CF" class="external-link" disabled>
         <i class="fab fa-github"></i>
       </a>
     </div>
@@ -501,16 +500,8 @@
       <div class="column is-8">
         <div class="content">
           <p>
-            This website is licensed under a <a rel="license"
-                                                href="http://creativecommons.org/licenses/by-sa/4.0/">Creative
-            Commons Attribution-ShareAlike 4.0 International License</a>.
-          </p>
-          <p>
-            This means you are free to borrow the <a
-              href="https://github.com/nerfies/nerfies.github.io">source code</a> of this website,
-            we just ask that you link back to this page in the footer.
-            Please remember to remove the analytics code included in the header of the website which
-            you do not want on your website.
+            Thanks nerfies for the <a
+              href="https://github.com/nerfies/nerfies.github.io">web template</a>.
           </p>
         </div>
       </div>
