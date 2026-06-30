@@ -19,25 +19,40 @@ function initModelViewers() {
         { 
             containerId: 'model-viewer-skeleton', 
             objPath: './static/obj/dancer-skelcf-skeleton.obj',
-            title: 'SKEL Skeleton'
+            title: 'SKEL Skeleton',
+            color: '#8fbfda',
+            scale: 1,
+            rotation: { x: Math.PI, y: 0, z: 0 },
+            cameraMargin: 1.14
         },
         { 
             containerId: 'model-viewer-skin', 
             objPath: './static/obj/dancer-skelcf-skin.obj',
-            title: 'SKEL Skin'
+            title: 'SKEL Skin',
+            color: '#bfc7cc',
+            scale: 1,
+            rotation: { x: Math.PI, y: 0, z: 0 },
+            cameraMargin: 1.14
         }
     ];
 
     modelConfigs.forEach(config => {
-        initSingleModel(config.containerId, config.objPath);
+        const container = document.getElementById(config.containerId);
+        if (container) {
+            initSingleModel(config.containerId, config.objPath, {
+                color: container.dataset.modelColor || config.color,
+                scale: config.scale,
+                rotation: config.rotation,
+                cameraMargin: config.cameraMargin
+            });
+        }
     });
 }
 
-function initSingleModel(containerId, objPath) {
+function initSingleModel(containerId, objPath, options = {}) {
     const container = document.getElementById(containerId);
     if (!container) {
-        console.warn('容器不存在:', containerId);
-        return;
+        return null;
     }
 
     // 创建场景
@@ -48,7 +63,7 @@ function initSingleModel(containerId, objPath) {
     const height = container.clientHeight || 400;
     
     // 创建相机
-    const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
+    const camera = new THREE.PerspectiveCamera(45, width / height, 0.01, 1000);
     camera.position.set(0, 0, 5);
     
     // 创建渲染器
@@ -77,6 +92,10 @@ function initSingleModel(containerId, objPath) {
     let rotationX = 0;
     let rotationY = 0;
     let distance = 5;
+    let minDistance = 0.5;
+    let maxDistance = 10;
+    let currentObject = null;
+    let currentPath = '';
     
     function onMouseDown(event) {
         isRotating = true;
@@ -105,8 +124,8 @@ function initSingleModel(containerId, objPath) {
     
     function onWheel(event) {
         event.preventDefault();
-        distance += event.deltaY * 0.01;
-        distance = Math.max(1, Math.min(10, distance));
+        distance += event.deltaY * distance * 0.001;
+        distance = Math.max(minDistance, Math.min(maxDistance, distance));
     }
     
     renderer.domElement.addEventListener('mousedown', onMouseDown);
@@ -115,41 +134,71 @@ function initSingleModel(containerId, objPath) {
     renderer.domElement.addEventListener('wheel', onWheel);
     renderer.domElement.style.cursor = 'grab';
 
-    // 加载OBJ模型（使用简化的OBJLoader）
-    loadOBJModel(objPath, function(object) {
-        // 计算模型边界，自动调整相机位置
-        const box = new THREE.Box3().setFromObject(object);
-        const center = box.getCenter(new THREE.Vector3());
-        const size = box.getSize(new THREE.Vector3());
-        
-        // 居中模型
-        object.position.sub(center);
-        
-        // 修正上下颠倒：绕X轴旋转180度
-        object.rotation.y = Math.PI;
-        
-        // 计算合适的初始相机距离
-        const maxDim = Math.max(size.x, size.y, size.z);
-        distance = maxDim * 2;
-        distance = Math.max(2, Math.min(8, distance));
-        
-        // 添加材质
-        object.traverse(function(child) {
-            if (child.isMesh) {
-                child.material = new THREE.MeshStandardMaterial({
-                    color: 0x888888,
-                    flatShading: false,
-                    metalness: 0.3,
-                    roughness: 0.7
-                });
+    function loadModel(path, modelOptions = {}) {
+        if (!path || path === currentPath) return;
+
+        const requestedPath = path;
+        currentPath = requestedPath;
+        container.classList.add('is-loading');
+
+        loadOBJModel(requestedPath, function(object) {
+            if (requestedPath !== currentPath) return;
+
+            if (currentObject) {
+                scene.remove(currentObject);
             }
+
+            // Center the raw OBJ geometry before applying the view transform.
+            const box = new THREE.Box3().setFromObject(object);
+            const center = box.getCenter(new THREE.Vector3());
+            centerObjectGeometry(object, center);
+            object.position.set(0, 0, 0);
+
+            const viewRotation = modelOptions.rotation || options.rotation || {};
+            object.rotation.set(
+                viewRotation.x || 0,
+                viewRotation.y || 0,
+                viewRotation.z || 0
+            );
+            object.scale.setScalar(modelOptions.scale || options.scale || 1);
+
+            object.updateMatrixWorld(true);
+            const displayBox = new THREE.Box3().setFromObject(object);
+            const size = displayBox.getSize(new THREE.Vector3());
+            const maxDim = Math.max(size.x, size.y, size.z);
+            const verticalFov = camera.fov * Math.PI / 180;
+            const horizontalFov = 2 * Math.atan(Math.tan(verticalFov / 2) * camera.aspect);
+            const fitHeightDistance = size.y / (2 * Math.tan(verticalFov / 2));
+            const fitWidthDistance = size.x / (2 * Math.tan(horizontalFov / 2));
+            const fitDistance = Math.max(fitHeightDistance, fitWidthDistance);
+            const cameraMargin = modelOptions.cameraMargin || options.cameraMargin || 1.2;
+            minDistance = Math.max(0.05, maxDim * 0.15);
+            maxDistance = Math.max(1, maxDim * 8);
+            distance = Math.max(minDistance, Math.min(maxDistance, fitDistance * cameraMargin));
+            
+            // 添加材质
+            object.traverse(function(child) {
+                if (child.isMesh) {
+                    child.material = new THREE.MeshStandardMaterial({
+                        color: modelOptions.color || options.color || 0x888888,
+                        flatShading: false,
+                        metalness: 0.2,
+                        roughness: 0.75
+                    });
+                }
+            });
+            
+            currentObject = object;
+            scene.add(object);
+            container.classList.remove('is-loading');
+        }, function(error) {
+            if (requestedPath !== currentPath) return;
+
+            console.error('加载模型失败:', error);
+            container.classList.remove('is-loading');
+            container.innerHTML = '<p style="padding: 2rem; text-align: center; color: #777;">Mesh failed to load. Please view this page through an HTTP server and confirm the OBJ file path exists.</p>';
         });
-        
-        scene.add(object);
-    }, function(error) {
-        console.error('加载模型失败:', error);
-        container.innerHTML = '<p style="padding: 2rem; text-align: center; color: #999;">模型加载失败</p>';
-    });
+    }
 
     // 窗口大小改变时调整渲染器
     function onWindowResize() {
@@ -160,6 +209,11 @@ function initSingleModel(containerId, objPath) {
         renderer.setSize(width, height);
     }
     window.addEventListener('resize', onWindowResize);
+
+    if (typeof ResizeObserver !== 'undefined') {
+        const resizeObserver = new ResizeObserver(onWindowResize);
+        resizeObserver.observe(container);
+    }
 
     // 动画循环
     function animate() {
@@ -176,6 +230,12 @@ function initSingleModel(containerId, objPath) {
         renderer.render(scene, camera);
     }
     animate();
+
+    loadModel(objPath, options);
+
+    return {
+        loadModel
+    };
 }
 
 // 简化的OBJ加载器
@@ -195,6 +255,16 @@ function loadOBJModel(url, onLoad, onError) {
         undefined,
         onError
     );
+}
+
+function centerObjectGeometry(object, center) {
+    object.traverse(function(child) {
+        if (child.isMesh && child.geometry) {
+            child.geometry.translate(-center.x, -center.y, -center.z);
+            child.geometry.computeBoundingBox();
+            child.geometry.computeBoundingSphere();
+        }
+    });
 }
 
 // 简化的OBJ解析器

@@ -111,7 +111,7 @@
           <div class="column has-text-centered">
             <div class="publication-links">
               <span class="link-block">
-                <a href="https://arxiv.org/abs/2511.20157v5"
+                <a href="https://arxiv.org/abs/2511.20157v6"
                    class="external-link button is-normal is-rounded is-dark">
                   <span class="icon">
                       <i class="ai ai-arxiv"></i>
@@ -126,6 +126,15 @@
                       <i class="fab fa-github"></i>
                   </span>
                   <span>Code</span>
+                </a>
+              </span>
+              <span class="link-block">
+                <a href="./static/poster_eccv.pdf"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="fas fa-chalkboard"></i>
+                  </span>
+                  <span>Poster</span>
                 </a>
               </span>
             </div>
@@ -154,10 +163,9 @@
 </section> -->
 
 
-<section class="hero is-light is-small">
-  <div class="hero-body" style="padding-left: 0; padding-right: 0;">
-    <div style="max-width: 1800px; width: 100%; padding: 0 20px; margin: 0 auto;">
-      <div id="results-carousel" class="carousel results-carousel" style="max-width: 100%; margin: 0 auto;">
+<section class="section video-preview-section">
+  <div class="container">
+    <div id="results-carousel" class="carousel results-carousel">
         <div class="item item-badminton01">
           <video id="badminton01" autoplay controls muted loop playsinline style="width: 100%; height: auto; display: block;">
             <source src="./static/videos/badminton01.mp4" type="video/mp4">
@@ -190,6 +198,32 @@
                     type="video/mp4">
           </video>
         </div>
+      </div>
+  </div>
+</section>
+
+<section class="section reconstruction-section">
+  <div class="container">
+    <h2 class="title is-3">3D Reconstruction Example</h2>
+    <hr style="margin-top: 0px; margin-bottom: 1.5rem;" />
+    <div class="reconstruction-grid">
+      <div class="reconstruction-panel">
+        <h3 class="title is-5 reconstruction-panel-title">RGB Input</h3>
+        <div class="reconstruction-media reconstruction-input">
+          <img src="./static/images/dancer.jpg" alt="Input RGB image of a dancer" loading="lazy" />
+        </div>
+      </div>
+      <div class="reconstruction-panel">
+        <h3 class="title is-5 reconstruction-panel-title">Surface Mesh</h3>
+        <div id="model-viewer-skin"
+             class="reconstruction-media reconstruction-viewer"
+             data-model-color="#bfc7cc"></div>
+      </div>
+      <div class="reconstruction-panel">
+        <h3 class="title is-5 reconstruction-panel-title">Skeleton Mesh</h3>
+        <div id="model-viewer-skeleton"
+             class="reconstruction-media reconstruction-viewer"
+             data-model-color="#8fbfda"></div>
       </div>
     </div>
   </div>
@@ -264,40 +298,51 @@
       </div>
     </div>
     <!--/ Visual Comparison. -->
-<!-- 3D Model Viewer Section
-<section class="section">
-  <div class="container">
+
+    <!-- Quantitative Comparison. -->
     <div class="columns">
       <div class="column is-12">
-        <h2 class="title is-3">More Visual Results</h2>
+        <h2 class="title is-3">Quantitative Comparison</h2>
         <hr style="margin-top: 0px; margin-bottom: 1.5rem;" />
-        <div class="columns">
-          <div class="column is-one-third">
-            <div class="box has-text-centered">
-              <h3 class="subtitle is-5" style="margin-bottom: 1rem;">INPUT</h3>
-              <img src="./static/images/dancer.jpg" alt="Dance Model" style="width: 100%; height: 400px; object-fit: contain; background: #f5f5f5; border-radius: 4px;" />
-            </div>
-          </div>
-          <div class="column is-one-third">
-            <div class="box has-text-centered">
-              <h3 class="subtitle is-5" style="margin-bottom: 1rem;">Skeleton Mesh</h3>
-              <div id="model-viewer-skeleton" style="width: 100%; height: 400px; background: #f5f5f5; border-radius: 4px;"></div>
-            </div>
-          </div>
-          <div class="column is-one-third">
-            <div class="box has-text-centered">
-              <h3 class="subtitle is-5" style="margin-bottom: 1rem;">Skin Mesh</h3>
-              <div id="model-viewer-skin" style="width: 100%; height: 400px; background: #f5f5f5; border-radius: 4px;"></div>
-            </div>
-          </div>
-        </div>
-        <div class="content has-text-left" style="margin-top: 1rem;">
-          <p><small>Drag to rotate | Scroll to zoom</small></p>
+        <div class="content has-text-left">
+          <img src="./static/images/quantitative_table.png" width="100%" style="margin-bottom: 0.5rem;" />
+          <p style="margin-bottom: 1.5rem;">
+            <strong>Table S2:</strong> Complete quantitative comparison of mesh recovery using the SMPL human model on 3DPW, EMDB, SPEC-SYN, MOYO, and the more challenging MOYO-HARD dataset. This table is the complete supplementary version of Table 2 in the main paper, including the MOYO and MOYO-HARD results omitted from the compact main-paper table.
+          </p>
         </div>
       </div>
     </div>
-  </div>
-</section> -->
+    <!--/ Quantitative Comparison. -->
+
+    <!-- Paper and Poster. -->
+    <div class="columns materials-section">
+      <div class="column is-12">
+        <h2 class="title is-3">Paper &amp; Poster</h2>
+        <hr style="margin-top: 0px; margin-bottom: 1.5rem;" />
+        <div class="publication-materials">
+          <a class="material-preview" href="https://arxiv.org/abs/2511.20157v6" target="_blank" rel="noopener">
+            <div class="material-preview-image material-preview-image-paper">
+              <img src="./static/images/arxiv_2511.20157v6_preview.jpg" alt="SKEL-CF arXiv paper preview" loading="lazy" />
+            </div>
+            <div class="material-preview-content">
+              <h3 class="title is-5">Paper</h3>
+              <p>arXiv v6</p>
+            </div>
+          </a>
+          <a class="material-preview" href="./static/poster_eccv.pdf" target="_blank" rel="noopener">
+            <div class="material-preview-image material-preview-image-poster">
+              <img src="./static/images/poster_eccv_preview.jpg" alt="SKEL-CF ECCV poster preview" loading="lazy" />
+            </div>
+            <div class="material-preview-content">
+              <h3 class="title is-5">Poster</h3>
+              <p>ECCV 2026 poster</p>
+            </div>
+          </a>
+        </div>
+      </div>
+    </div>
+    <!--/ Paper and Poster. -->
+
     <!--
     Paper video.
     <div class="columns is-centered has-text-centered">
@@ -468,7 +513,7 @@
   <div class="container">
     <div class="content has-text-centered" style="margin-bottom: 0.5rem;">
       <a class="icon-link"
-         href="https://arxiv.org/abs/2511.20157">
+         href="https://arxiv.org/abs/2511.20157v6">
         <i class="fas fa-file-pdf"></i>
       </a>
       <a class="icon-link" href="https://github.com/Intellindust-AI-Lab/SKEL-CF" class="external-link" disabled>
@@ -477,8 +522,7 @@
     </div>
     <div class="content has-text-centered" style="font-size: 0.85em; margin-top: 0.5rem; margin-bottom: 0;">
       <p style="margin-bottom: 0;">
-        Thanks nerfies for the <a
-          href="https://github.com/nerfies/nerfies.github.io">web template</a>.
+        Update by Ji-ping Jin June 2026
       </p>
     </div>
   </div>
