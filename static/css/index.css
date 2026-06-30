@@ -1,5 +1,6 @@
 html {
   background: #e9eef2;
+  min-height: 100%;
 }
 
 body {
@@ -7,17 +8,28 @@ body {
   min-height: 100vh;
   margin: 0;
   position: relative;
+  overflow-x: hidden;
   background-color: #e9eef2;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
   background-image:
     linear-gradient(rgba(246, 248, 250, 0.78), rgba(246, 248, 250, 0.82)),
     url("../images/background.jpg");
   background-position: center center, center center;
   background-size: cover, cover;
   background-repeat: no-repeat, no-repeat;
-  background-attachment: fixed, fixed;
+  transform: translateZ(0);
 }
 
 .page-frame {
+  position: relative;
+  z-index: 1;
   width: min(1440px, calc(100% - 48px));
   margin: 24px auto 32px;
   overflow: hidden;
